@@ -59,7 +59,8 @@ public class SecurityConfig {
                 "http://localhost:3000",
                 "http://127.0.0.1:3000",
                 "http://localhost:5173",     // Vite 기본 포트
-                "http://127.0.0.1:5173"
+                "http://127.0.0.1:5173",
+                "https://java-project-frontend-real.onrender.com"
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
