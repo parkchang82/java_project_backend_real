@@ -14,13 +14,19 @@ public class WebConfig implements WebMvcConfigurer {
     private String uploadDir;
 
     // 1. CORS 설정 (기존 내용 유지)
+ // 파일: com.example.demo.config.WebConfig.java
+
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins("http://localhost:3000")
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                .allowCredentials(true)
-                .maxAge(3600);
+            // 로컬 주소와 배포된 프론트엔드 주소 모두 허용하도록 수정
+            .allowedOrigins(
+                "http://localhost:3000", // 로컬 환경
+                "https://java-project-frontend-real.onrender.com" // 배포된 프론트엔드 주소 (HTTPS 포함)
+            )
+            .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+            .allowCredentials(true)
+            .maxAge(3600);
     }
 
     // 2. 이미지 경로 매핑 설정 (새로 추가된 부분)
