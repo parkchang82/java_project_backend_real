@@ -2,7 +2,7 @@
 FROM eclipse-temurin:21-jdk-alpine AS builder
 
 # 작업 디렉토리를 Spring 프로젝트 폴더로 설정
-WORKDIR /CodeJavaApp
+WORKDIR /project-backend/CodeJavaApp
 
 # Gradle 설정 파일 복사
 COPY gradlew .
