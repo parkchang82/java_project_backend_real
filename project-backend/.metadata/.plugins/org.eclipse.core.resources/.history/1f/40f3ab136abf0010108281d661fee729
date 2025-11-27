@@ -1,0 +1,88 @@
+package com.example.demo;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService; // 🚨 추가
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter; // 🚨 추가
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
+import java.util.List;
+
+@Configuration
+@EnableWebSecurity
+public class SecurityConfig {
+
+    // 🚨 1. JwtUtil 및 UserDetailsService 주입
+    private final JwtUtil jwtUtil;
+    private final UserDetailsService userDetailsService; 
+
+    // 생성자를 통한 의존성 주입 (Spring이 자동으로 Bean을 찾아서 넣어줍니다)
+    public SecurityConfig(JwtUtil jwtUtil, UserDetailsService userDetailsService) {
+        this.jwtUtil = jwtUtil;
+        this.userDetailsService = userDetailsService;
+    }
+
+
+    // 2. PasswordEncoder (비밀번호 암호화) 설정
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder(); // 가장 널리 사용되는 암호화 방식
+    }
+
+    // 3. CORS 설정 (기존과 동일)
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://127.0.0.1:3000")); 
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowCredentials(true); 
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration); 
+        return source;
+    }
+
+    // 4. Security Filter Chain (인증/인가 규칙) 설정
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        
+        // 🚨 4.1. JWT 필터 인스턴스 생성
+        JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtUtil, userDetailsService);
+
+        http
+            .httpBasic(AbstractHttpConfigurer::disable)
+            .csrf(AbstractHttpConfigurer::disable)
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            
+            // 세션 미사용 설정
+            .sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            
+            // JWT 필터 추가
+            // 🚨 4.2. JWT 필터를 UsernamePasswordAuthenticationFilter 전에 추가하여,
+            //        매 요청마다 헤더의 토큰을 검증하게 합니다.
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+            
+            // 접근 권한 설정
+            .authorizeHttpRequests(authz -> authz
+                // '/api/login', '/api/signup', '/api/auth/logout' 경로는 누구나 접근 가능
+                .requestMatchers("/api/login", "/api/signup", "/api/auth/logout").permitAll()
+                
+                // 나머지 모든 요청은 인증된 사용자만 접근 가능
+                .anyRequest().authenticated() 
+            );
+
+        return http.build();
+    }
+}

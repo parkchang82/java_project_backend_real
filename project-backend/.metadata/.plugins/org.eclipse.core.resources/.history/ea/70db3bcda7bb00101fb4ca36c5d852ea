@@ -1,0 +1,52 @@
+package com.example.demo;
+
+//AuthController.java (예시)
+@RestController
+@RequestMapping("/api")
+@RequiredArgsConstructor
+public class AuthController {
+ private final AuthenticationManagerBuilder authenticationManagerBuilder;
+ private final JwtTokenProvider tokenProvider;
+ 
+ // 프론트엔드에서 POST /api/login 으로 요청
+ @PostMapping("/login")
+ public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
+     
+     // 1. UsernamePasswordAuthenticationToken 생성
+     // 프론트에서 넘어온 email(username)과 password 사용
+     UsernamePasswordAuthenticationToken authenticationToken =
+         new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword());
+
+     try {
+         // 2. 인증 시도: CustomUserDetailsService의 loadUserByUsername 호출 및 비밀번호 비교
+         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
+         
+         // 3. 인증 성공 시, JWT 토큰 생성
+         String jwt = tokenProvider.createToken(authentication);
+
+         // 4. 성공 응답 (프론트에서 기대하는 success: true와 토큰)
+         return ResponseEntity.ok(new LoginResponse(true, jwt));
+         
+     } catch (AuthenticationException e) {
+         // 5. 인증 실패 (아이디 또는 비밀번호 불일치)
+         // 프론트의 catch 블록으로 이동하게 됨
+         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                              .body(new LoginResponse(false, "이메일 또는 비밀번호가 잘못되었습니다."));
+     }
+ }
+}
+
+//LoginRequest.java (DTO) - 요청 본문 매핑용
+@Data // Lombok
+public class LoginRequest {
+ private String username; // 프론트의 email 값이 여기에 바인딩됨
+ private String password;
+}
+
+//LoginResponse.java (DTO) - 응답 본문 구조
+@Data // Lombok
+@AllArgsConstructor // Lombok
+public class LoginResponse {
+ private boolean success;
+ private String token; // JWT 토큰
+}

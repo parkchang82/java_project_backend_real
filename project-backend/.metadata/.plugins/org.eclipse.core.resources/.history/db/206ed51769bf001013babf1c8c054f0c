@@ -1,0 +1,79 @@
+package com.example.study;
+
+import com.example.study.domain.Post;
+import com.example.study.repository.PostRepository;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/posts")
+public class PostController {
+
+    private final PostRepository postRepository;
+
+    public PostController(PostRepository postRepository) {
+        this.postRepository = postRepository;
+    }
+
+    // ✅ 요청 DTO
+    public static record PostCreateReq(String title, String content, String author) {}
+    public static record PostUpdateReq(String title, String content, String author) {}
+
+    // 🟢 CREATE (글 작성)
+    @PostMapping
+    public Post create(@RequestBody PostCreateReq req) {
+        Post p = new Post();
+        p.setTitle(req.title());
+        p.setContent(req.content());
+        p.setAuthor(req.author());
+        return postRepository.save(p);
+    }
+
+    // 🟢 READ (전체 목록)
+    @GetMapping
+    public List<Post> list() {
+        return postRepository.findAll();
+    }
+
+    // 🟢 READ (단일 조회)
+    @GetMapping("/{id}")
+    public Post getOne(@PathVariable("id") Long id) {   // ✅ 수정됨
+        return postRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("post not found: " + id));
+    }
+
+    // 🟡 UPDATE (수정)
+    @PutMapping("/{id}")
+    public Post update(@PathVariable("id") Long id,     // ✅ 수정됨
+                       @RequestBody PostUpdateReq req) {
+
+        Post p = postRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("post not found: " + id));
+
+        if (!p.getAuthor().equals(req.author())) {
+            throw new RuntimeException("작성자만 수정할 수 있습니다.");
+        }
+
+        p.setTitle(req.title());
+        p.setContent(req.content());
+
+        return postRepository.save(p);
+    }
+
+    // 🔴 DELETE (삭제)
+    @DeleteMapping("/{id}")
+    public String delete(@PathVariable("id") Long id,    // ✅ 수정됨
+                         @RequestParam("author") String author) {
+
+        Post p = postRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("post not found: " + id));
+
+        if (!p.getAuthor().equals(author)) {
+            throw new RuntimeException("작성자만 삭제할 수 있습니다.");
+        }
+
+        postRepository.delete(p);
+        return "삭제 완료: " + id;
+    }
+}

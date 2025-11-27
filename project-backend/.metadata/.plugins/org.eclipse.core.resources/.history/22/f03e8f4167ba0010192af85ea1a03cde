@@ -1,0 +1,31 @@
+package com.example.demo;
+
+//SecurityConfig.java 파일 수정
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+
+//... filterChain 메서드 내부 수정
+ http
+     .httpBasic(AbstractHttpConfigurer::disable)
+     .csrf(AbstractHttpConfigurer::disable)
+     
+     // 💡 수정된 부분: cors() 메서드를 직접 정의합니다.
+     .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+     
+     .sessionManagement(session -> session
+         .sessionCreationPolicy(SessionPolicy.STATELESS));
+//...
+
+//CorsConfigurationSource 빈 정의 추가 (필터 체인 외부)
+@Bean
+public CorsConfigurationSource corsConfigurationSource() {
+ CorsConfiguration configuration = new CorsConfiguration();
+ configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000")); // 프론트엔드 주소
+ configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+ configuration.setAllowedHeaders(Arrays.asList("*"));
+ configuration.setAllowCredentials(true);
+ UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+ source.registerCorsConfiguration("/**", configuration);
+ return source;
+}

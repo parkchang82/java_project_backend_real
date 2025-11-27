@@ -1,0 +1,9 @@
+package com.example.study.repository;
+
+import com.example.study.domain.StudyRoomMember;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface StudyRoomMemberRepository extends JpaRepository<StudyRoomMember, Long> {
+    // 일단 여기서는 기본 CRUD만 쓰고,
+    // 조건 검색/삭제는 모두 컨트롤러에서 직접 필터링해서 처리할 거야.
+}

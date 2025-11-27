@@ -1,0 +1,21 @@
+package com.example.demo;
+
+//예시: SecurityConfig.java (API 서버용 기본 설정)
+@Configuration
+@EnableWebSecurity
+public class SecurityConfig {
+
+ @Bean
+ public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+     http
+         .httpBasic(AbstractHttpConfigurer::disable) // 기본 HTTP 인증 비활성화
+         .csrf(AbstractHttpConfigurer::disable)     // (1) CSRF 비활성화 (API/JWT 방식에서는 필요 없음)
+         .cors(Customizer.withDefaults())           // (2) 위에서 정의한 CORS 설정 사용
+         .sessionManagement(session -> session
+             .sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // (3) 세션 사용 안 함 (API/JWT의 핵심)
+         // ... API 경로별 접근 권한 설정 추가 ...
+         ;
+     return http.build();
+ }
+ // ...
+}

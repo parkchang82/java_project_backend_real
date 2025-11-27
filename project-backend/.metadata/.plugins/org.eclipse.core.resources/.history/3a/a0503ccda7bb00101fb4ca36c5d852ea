@@ -1,0 +1,50 @@
+package com.example.demo;
+
+package com.example.login.controller;
+
+import com.example.login.dto.LoginRequest;
+import com.example.login.dto.LoginResponse;
+import com.example.login.jwt.JwtTokenProvider;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api")
+@RequiredArgsConstructor
+public class AuthController {
+
+    private final AuthenticationManagerBuilder authenticationManagerBuilder;
+    private final JwtTokenProvider tokenProvider;
+
+    // React에서 POST /api/login 으로 요청
+    @PostMapping("/login")
+    public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
+        
+        // 1. 프론트에서 받은 이메일/비밀번호로 인증 토큰 객체 생성
+        UsernamePasswordAuthenticationToken authenticationToken =
+            new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword());
+
+        try {
+            // 2. 인증 시도: CustomUserDetailsService 및 PasswordEncoder를 통해 검증
+            Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
+            
+            // 3. 인증 성공 시, JWT 토큰 생성
+            String jwt = tokenProvider.createToken(authentication);
+
+            // 4. 성공 응답 (프론트에서 기대하는 success: true와 토큰)
+            return ResponseEntity.ok(new LoginResponse(true, jwt));
+            
+        } catch (AuthenticationException e) {
+            // 5. 인증 실패 (아이디 또는 비밀번호 불일치 시)
+            // 프론트의 catch 블록으로 이동
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                                 .body(new LoginResponse(false, "이메일 또는 비밀번호가 잘못되었습니다."));
+        }
+    }
+}
