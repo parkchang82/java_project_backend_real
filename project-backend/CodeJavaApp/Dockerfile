@@ -24,7 +24,7 @@ FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 
 # 빌드 스테이지에서 생성된 Jar 파일 복사 (경로: CodeJavaApp/build/libs/CodeJavaApp-0.0.1-SNAPSHOT.jar)
-COPY --from=builder /CodeJavaApp/build/libs/*.jar CodeJavaApp.jar
+COPY --from=builder /project-backend/CodeJavaApp/build/libs/*.jar CodeJavaApp.jar
 
 # Jar 파일을 실행할 때 정적 파일이 포함된 상태로 실행됩니다.
 WORKDIR /app
