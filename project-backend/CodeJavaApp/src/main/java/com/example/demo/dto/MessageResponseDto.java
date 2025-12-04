@@ -2,11 +2,8 @@ package com.example.demo.dto;
 
 import com.example.demo.domain.Message;
 import com.example.demo.domain.User;
-// lombok import들을 모두 삭제!
-
 import java.time.LocalDateTime;
 
-// @Data, @NoArgsConstructor 삭제!
 public class MessageResponseDto {
 
     private Long messageId;
@@ -18,18 +15,20 @@ public class MessageResponseDto {
     private String senderName;
     private String receiverName;
 
+    // ⭐️ [추가됨] 프론트엔드 로직에 필수적인 이메일 필드
+    private String senderEmail;
+    private String receiverEmail;
+
     // 1. 기본 생성자
     public MessageResponseDto() {
     }
 
     /**
      * 엔티티를 DTO로 변환하는 static 팩토리 메서드
-     * (이건 Service에서 사용)
      */
     public static MessageResponseDto fromEntity(Message message) {
         MessageResponseDto dto = new MessageResponseDto();
         
-        // DTO의 Setter 메서드를 사용하여 값 설정
         dto.setMessageId(message.getMessageId());
         dto.setContent(message.getContent());
         dto.setSentAt(message.getSentAt());
@@ -40,74 +39,46 @@ public class MessageResponseDto {
         
         dto.setSenderId(sender.getId());
         dto.setSenderName(sender.getName());
+        // ⭐️ [추가됨] 보낸 사람 이메일 설정
+        dto.setSenderEmail(sender.getEmail());
+
         dto.setReceiverId(receiver.getId());
         dto.setReceiverName(receiver.getName());
+        // ⭐️ [추가됨] 받는 사람 이메일 설정
+        dto.setReceiverEmail(receiver.getEmail());
         
         return dto;
     }
 
     // 2. Getter / Setter
-    public Long getMessageId() {
-        return messageId;
-    }
+    public Long getMessageId() { return messageId; }
+    public void setMessageId(Long messageId) { this.messageId = messageId; }
 
-    public void setMessageId(Long messageId) {
-        this.messageId = messageId;
-    }
+    public Long getSenderId() { return senderId; }
+    public void setSenderId(Long senderId) { this.senderId = senderId; }
 
-    public Long getSenderId() {
-        return senderId;
-    }
+    public Long getReceiverId() { return receiverId; }
+    public void setReceiverId(Long receiverId) { this.receiverId = receiverId; }
 
-    public void setSenderId(Long senderId) {
-        this.senderId = senderId;
-    }
+    public String getContent() { return content; }
+    public void setContent(String content) { this.content = content; }
 
-    public Long getReceiverId() {
-        return receiverId;
-    }
+    public LocalDateTime getSentAt() { return sentAt; }
+    public void setSentAt(LocalDateTime sentAt) { this.sentAt = sentAt; }
 
-    public void setReceiverId(Long receiverId) {
-        this.receiverId = receiverId;
-    }
+    public boolean isRead() { return isRead; }
+    public void setRead(boolean isRead) { this.isRead = isRead; }
 
-    public String getContent() {
-        return content;
-    }
+    public String getSenderName() { return senderName; }
+    public void setSenderName(String senderName) { this.senderName = senderName; }
 
-    public void setContent(String content) {
-        this.content = content;
-    }
+    public String getReceiverName() { return receiverName; }
+    public void setReceiverName(String receiverName) { this.receiverName = receiverName; }
 
-    public LocalDateTime getSentAt() {
-        return sentAt;
-    }
+    // ⭐️ [추가됨] 이메일 Getter / Setter
+    public String getSenderEmail() { return senderEmail; }
+    public void setSenderEmail(String senderEmail) { this.senderEmail = senderEmail; }
 
-    public void setSentAt(LocalDateTime sentAt) {
-        this.sentAt = sentAt;
-    }
-
-    public boolean isRead() {
-        return isRead;
-    }
-
-    public void setRead(boolean isRead) {
-        this.isRead = isRead;
-    }
-
-    public String getSenderName() {
-        return senderName;
-    }
-
-    public void setSenderName(String senderName) {
-        this.senderName = senderName;
-    }
-
-    public String getReceiverName() {
-        return receiverName;
-    }
-
-    public void setReceiverName(String receiverName) {
-        this.receiverName = receiverName;
-    }
+    public String getReceiverEmail() { return receiverEmail; }
+    public void setReceiverEmail(String receiverEmail) { this.receiverEmail = receiverEmail; }
 }
