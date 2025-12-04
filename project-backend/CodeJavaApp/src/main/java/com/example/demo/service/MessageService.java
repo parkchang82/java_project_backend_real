@@ -47,11 +47,8 @@ public class MessageService {
      // [수정된 부분!]
         // 2. 받는 사람(receiver)을 Email로 조회합니다. (님의 UserRepository 메서드 사용)
         User receiver = userRepository.findByEmail(requestDto.getReceiverEmail());
+            .orElseThrow(() -> new IllegalArgumentException("받는 사람을 찾을 수 없습니다. Email: " + requestDto.getReceiverEmail()));
         
-        // 3. Optional 대신 null을 확인하는 로직
-        if (receiver == null) {
-            throw new IllegalArgumentException("받는 사람을 찾을 수 없습니다. Email: " + requestDto.getReceiverEmail());
-        }
         // [수정 끝]
 
         Message message = new Message();
