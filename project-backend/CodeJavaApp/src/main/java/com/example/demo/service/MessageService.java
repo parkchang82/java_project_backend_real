@@ -56,6 +56,8 @@ public class MessageService {
         message.setReceiver(receiver);
         message.setContent(requestDto.getContent());
 
+    message.setSentAt(LocalDateTime.now());
+        
         Message savedMessage = messageRepository.save(message);
 
         // DTO의 static 메서드로 변환
