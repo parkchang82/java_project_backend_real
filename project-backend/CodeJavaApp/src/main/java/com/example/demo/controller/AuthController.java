@@ -14,6 +14,7 @@ import com.example.demo.JwtUtil;
 import com.example.demo.domain.User;
 import com.example.demo.dto.ChangePasswordRequest;
 import com.example.demo.repository.UserRepository;
+import com.example.demo.dto.UserSignUpRequestDto;
 
 import jakarta.transaction.Transactional;
 
@@ -60,14 +61,26 @@ public class AuthController {
      * (사용자 코드 그대로 유지 - 이제 주입된 passwordEncoder를 사용합니다)
      */
     @PostMapping("/signup")
-    public ResponseEntity<?> registerUser(@RequestBody User user) {
-        if (repo.findByEmail(user.getEmail()) != null) {
+    public ResponseEntity<?> registerUser(@RequestBody UserSignUpRequestDto requestDto) { // ⭐️ DTO로 받도록 수정!
+    
+        // 1. 이메일 중복 확인
+        if (repo.findByEmail(requestDto.getEmail()).isPresent()) { // .isPresent()를 쓰는 게 좋습니다
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("success", false, "message", "이미 존재하는 이메일입니다."));
         }
         
-        String encodedPassword = passwordEncoder.encode(user.getPassword());
+        // 2. DTO -> Entity 변환 및 패스워드 암호화
+        User user = new User();
+        user.setEmail(requestDto.getEmail());
+        user.setName(requestDto.getName());
+        user.setGender(requestDto.getGender());
+        user.setDate(requestDto.getDate()); // 생년월일
+        
+        String encodedPassword = passwordEncoder.encode(requestDto.getPassword());
         user.setPassword(encodedPassword);
         
+        // profileImage는 null이 허용된다고 가정하고 설정하지 않습니다.
+        
+        // 3. 저장
         repo.save(user);
         return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("success", true, "message", "회원가입이 완료되었습니다."));
     }
