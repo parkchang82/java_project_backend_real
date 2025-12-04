@@ -42,11 +42,11 @@ public class MessageService {
         
         // 1. 보내는 사람(sender) 조회 (이건 동일)
         User sender = userRepository.findById(senderId)
-                .orElseThrow(() -> new IllegalArgumentException("보내는 사람을 찾을 수 없습니다. ID: " + senderId));
+            .orElseThrow(() -> new IllegalArgumentException("보내는 사람을 찾을 수 없습니다. ID: " + senderId));
 
      // [수정된 부분!]
         // 2. 받는 사람(receiver)을 Email로 조회합니다. (님의 UserRepository 메서드 사용)
-        User receiver = userRepository.findByEmail(requestDto.getReceiverEmail());
+        User receiver = userRepository.findByEmail(requestDto.getReceiverEmail())
             .orElseThrow(() -> new IllegalArgumentException("받는 사람을 찾을 수 없습니다. Email: " + requestDto.getReceiverEmail()));
         
         // [수정 끝]
