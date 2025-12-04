@@ -56,7 +56,7 @@ public class MessageService {
         message.setReceiver(receiver);
         message.setContent(requestDto.getContent());
 
-    message.setSentAt(LocalDateTime.now());
+        message.setSentAt(LocalDateTime.now());
         
         Message savedMessage = messageRepository.save(message);
 
