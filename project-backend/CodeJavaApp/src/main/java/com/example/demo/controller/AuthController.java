@@ -82,7 +82,8 @@ public class AuthController {
         String email = request.getEmail();
         String rawPassword = request.getPassword();
         
-        User user = repo.findByEmail(email);
+        User user = repo.findByEmail(email)
+            .orElseThrow(() -> new IllegalArgumentException("이메일로 사용자를 찾을 수 없습니다."));
 
         // ⭐️ 'passwordEncoder'가 이제 '공식 암호화기'이므로 matches()가 성공합니다.
         if (user == null || !passwordEncoder.matches(rawPassword, user.getPassword())) {
@@ -112,7 +113,8 @@ public class AuthController {
         }
         
         String authenticatedEmail = userDetails.getUsername(); 
-        User user = repo.findByEmail(authenticatedEmail);
+        User user = repo.findByEmail(authenticatedEmail)
+            .orElseThrow(() -> new IllegalArgumentException("인증된 이메일로 사용자를 찾을 수 없습니다."));
 
         if (user == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "사용자 정보를 찾을 수 없습니다."));
@@ -147,7 +149,8 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
         }
         String authenticatedEmail = authentication.getName();
-        User user = repo.findByEmail(authenticatedEmail);
+        User user = repo.findByEmail(authenticatedEmail)
+            .orElseThrow(() -> new IllegalArgumentException("업데이트할 사용자를 찾을 수 없습니다."));
         
         if (user == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("success", false, "message", "사용자 정보를 찾을 수 없습니다."));
